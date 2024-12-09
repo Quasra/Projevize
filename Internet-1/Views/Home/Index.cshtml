@@ -1,0 +1,237 @@
+﻿@model List<FileManagerViewModel>
+@using Microsoft.AspNetCore.Http
+@using System.Net;
+
+@{
+    var currentPath = ViewBag.CurrentPath as string;
+
+
+
+    var uploadMessage = TempData["UploadMessage"] as string; // TempData'dan gelen mesajı alıyoruz
+}
+
+<div class="container">
+    <h2>Dosya Yönetim</h2>
+
+    <!-- Yeni Klasör Oluştur 
+      <form action="@Url.Action("CreateFolder", "FileManager")" method="post">
+          <input type="hidden" name="folderPath" value="@currentPath" />
+          <div class="input-group mb-3">
+              <input type="text" name="folderName" class="form-control" placeholder="Yeni Dosya İsmi" required />
+              <div class="input-group-append">
+                  <button class="btn btn-success" type="submit">Dosya Oluştur</button>
+              </div>
+          </div>
+      </form> -->
+
+    <!-- Dosya Yükleme -->
+    <form action="@Url.Action("UploadFile", "FileManager")" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="folderPath" value="@currentPath" />
+        <div class="form-group">
+            <input type="file" name="file" class="form-control" />
+            <button type="submit" class="btn btn-primary mt-2">Yükle</button>
+        </div>
+    </form>
+
+    <!-- Dosya/Klasör Tablosu -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Dosya İsmi</th>
+                <th>Değiştirilme Tarihi</th>
+                <th>Boyut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @if (item.Type == "File" && (item.Name.EndsWith(".png") || item.Name.EndsWith(".jpg") || item.Name.EndsWith(".jpeg") || item.Name.EndsWith(".gif") || item.Name.EndsWith(".mp4")))
+
+
+
+                        {
+                            <a href="javascript:void(0);" onclick="openModal('@Url.Content("~/uploads/" + item.Name)')">
+                                <img src="@Url.Content("~/uploads/" + item.Name)" alt="@item.Name" style="width: 100px; cursor: pointer;" />
+                            </a>
+                        }
+
+                        else if (item.Type == "Folder")
+
+                        {
+                            <a href="@Url.Action("Index", "FileManager", new { folderPath = WebUtility.UrlEncode(item.Path) })">
+                                @item.Name
+                            </a>
+                        }
+
+                        else
+                        {
+                            @item.Name
+                        }
+                    </td>
+                    <td>@item.ModifiedDate</td>
+                    <td>
+                        @if (item.Type == "File")
+
+                        {
+                            <a href="@Url.Action("Download", "FileManager", new { filePath = WebUtility.UrlEncode(item.Path) })" class="btn btn-primary btn-sm">
+                                <i class="fas fa-download"></i>
+                            </a>
+                        }
+                        <a href="javascript:void(0);" onclick="showDeleteConfirmation('@Url.Action("Delete", "FileManager", new { path = WebUtility.UrlEncode(item.Path), type = item.Type })')" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal Yapısı -->
+<div id="imageModal" class="modal" style="display: none;">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="modalImage" />
+</div>
+
+<!-- Silme Onayı Modalı -->
+<div id="deleteConfirmationModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h4>Kalıcı olarak silmek istediğinize emin misiniz?</h4>
+        <div class="button-container">
+            <button class="btn btn-danger btn-sm" id="confirmDeleteBtn">Evet</button>
+            <button class="btn btn-secondary btn-sm" onclick="closeDeleteConfirmation()">İptal</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+@if (!string.IsNullOrEmpty(uploadMessage))
+
+{
+    <div id="uploadMessage" class="toast-notification @((uploadMessage.Contains("Error") ? "error" : ""))">
+        @uploadMessage
+    </div>
+}
+
+<style>
+    .modal {
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        width: 400px;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 25px;
+        color: white;
+        font-size: 35px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    /* Silme Onayı Modalı */
+    #deleteConfirmationModal .modal-content {
+        max-width: 400px;
+    }
+
+    /* Modal butonları */
+    .button-container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+    }
+
+        .button-container button {
+            width: 45%;
+        }
+
+    .toast-notification {
+        position: fixed;
+        bottom: 70px;
+        right: 20px;
+        background-color: #4CAF50; /* Green for success */
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        opacity: 1;
+        transition: opacity 0.5s ease-out;
+    }
+
+        .toast-notification.error {
+            background-color: #f44336; /* Red for error */
+        }
+
+        .toast-notification.fade-out {
+            opacity: 0;
+            transition: opacity 1s ease-out;
+        }
+
+    /* Butonlar için stiller */
+    .btn-sm {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+</style>
+
+<script>
+    function openModal(imageSrc) {
+        document.getElementById("modalImage").src = imageSrc;
+        document.getElementById("imageModal").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("imageModal").style.display = "none";
+    }
+
+    // Toast notification logic
+    window.onload = function () {
+        var message = document.getElementById('uploadMessage');
+        if (message) {
+            setTimeout(function () {
+                message.classList.add('fade-out');
+            }, 3000); // 3 seconds after page load
+
+            setTimeout(function () {
+                message.style.display = 'none'; // Completely hide after fade
+            }, 3500); // 3.5 seconds to fully hide
+        }
+    };
+
+    // Silme işlemi için modal göster
+    var deleteUrl = "";
+    function showDeleteConfirmation(url) {
+        deleteUrl = url;
+        document.getElementById("deleteConfirmationModal").style.display = "flex";
+    }
+
+    // Silme işlemi için onay
+    document.getElementById("confirmDeleteBtn")?.addEventListener("click", function () {
+        window.location.href = deleteUrl;
+    });
+
+    // Silme onayı modalını kapat
+    function closeDeleteConfirmation() {
+        document.getElementById("deleteConfirmationModal").style.display = "none";
+    }
+</script>

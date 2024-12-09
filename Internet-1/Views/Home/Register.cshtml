@@ -1,0 +1,161 @@
+﻿@{
+    Layout = null;
+}
+@model RegisterModel
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Yeni Kayıt</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Inline custom CSS -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .form-container {
+            width: 50%;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 30px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 9px;
+            text-align: center;
+        }
+
+        .form-container h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        .form-container .form-control {
+            width: 80%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-container .form-control:focus {
+            border-color: #4e54c8;
+            outline: none;
+            box-shadow: 0 0 5px rgba(78, 84, 200, 0.3);
+        }
+
+        .form-container .btn-primary {
+            width: 70%;
+            background: #4e54c8;
+            color: #ffffff;
+            font-size: 1rem;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-container .btn-primary:hover {
+            background: #3c42a6;
+        }
+
+        .form-container .text-small {
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .form-container .text-small a {
+            color: #4e54c8;
+            text-decoration: none;
+        }
+
+        .form-container .text-small a:hover {
+            text-decoration: underline;
+        }
+
+        .image-container {
+            width: 50%;
+            background-size: cover;
+            background-position: center;
+            animation: image-slider 15s infinite;
+        }
+
+        @@keyframes image-slider {
+            0% {
+                background-image: url('https://picsum.photos/1920/1080?1');
+            }
+            33% {
+                background-image: url('https://picsum.photos/1920/1080?2');
+            }
+            66% {
+                background-image: url('https://picsum.photos/1920/1080?3');
+            }
+            100% {
+                background-image: url('https://picsum.photos/1920/1080?1');
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Left Form Container -->
+        <div class="form-container">
+            <h1>Yeni Kayıt</h1>
+            <form asp-action="Register" method="post" enctype="multipart/form-data">
+                <input class="form-control" asp-for="UserName" placeholder="Kullanıcı Adı">
+                <input class="form-control" asp-for="Email" placeholder="E-Posta Adresi">
+                <input class="form-control" asp-for="FullName" placeholder="Adı Soyadı">
+                <input type="password" class="form-control" asp-for="Password" placeholder="Parola">
+                <input type="password" class="form-control" asp-for="PasswordConfirm" placeholder="Parola Tekrar">
+                <input type="submit" class="btn-primary" value="Kayıt Ol">
+            </form>
+            <div class="text-small">
+                <p>Zaten hesabınız var mı? <a asp-action="Login">Giriş Yap</a></p>
+            </div>
+        </div>
+
+        <!-- Right Image Container -->
+        <div class="image-container">
+            <!-- This will be dynamically updated by CSS animation -->
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/sbadmin/vendor/jquery/jquery.min.js"></script>
+    <script src="~/sbadmin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/sbadmin/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="~/sbadmin/js/sb-admin-2.min.js"></script>
+    @await Component.InvokeAsync("Notyf")
+</body>
+
+</html>

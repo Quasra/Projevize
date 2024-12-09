@@ -1,0 +1,158 @@
+﻿@{
+    Layout = null;
+}
+@model LoginModel
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Oturum Aç</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Inline custom CSS -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            background: black;
+        }
+
+        .left-container {
+            flex: 0.8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-card {
+            width: 90%;
+            max-width: 400px;
+            height:450px;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 9px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            text-align: center;
+        }
+
+            .login-card h1 {
+                font-size: 1.8rem;
+                font-weight: 600;
+                color: black;
+                margin-bottom: 20px;
+            }
+
+            .login-card .form-control {
+                width: 80%;
+                padding: 15px;
+                margin: 10px 0;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 1rem;
+            }
+
+                .login-card .form-control:focus {
+                    border-color: #4e54c8;
+                    outline: none;
+                    box-shadow: 0 0 5px rgba(78, 84, 200, 0.3);
+                }
+
+            .login-card .btn-primary {
+                width: 100%;
+                background: #4e54c8;
+                color: #ffffff;
+                font-size: 1rem;
+                padding: 12px;
+                margin-top: 15px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+                .login-card .btn-primary:hover {
+                    background: #3c42a6;
+                }
+
+            .login-card .text-small {
+                margin-top: 10px;
+                font-size: 0.9rem;
+            }
+
+                .login-card .text-small a {
+                    color: #4e54c8;
+                    text-decoration: none;
+                }
+
+                    .login-card .text-small a:hover {
+                        text-decoration: underline;
+                    }
+
+       <!-- .right-container {
+            flex: 1;
+            position: relative;
+            background: url('https://picsum.photos/1920/1080') no-repeat center center;
+            background-size: cover;
+            animation: image-slider 12s infinite;
+        }-->
+
+       <!-- @@keyframes image-slider {
+            0% {
+                background-image: url('https://picsum.photos/1920/1080?1');
+            }
+            33% {
+                background-image: url('https://picsum.photos/1920/1080?2');
+            }
+            66% {
+                background-image: url('https://picsum.photos/1920/1080?3');
+            }
+            100% {
+                background-image: url('https://picsum.photos/1920/1080?1');
+            }
+        }-->
+    </style>
+</head>
+
+<body>
+    <div class="left-container">
+        <div class="login-card">
+            <h1>Giriş Ekranı</h1>
+            <form asp-action="Login" method="post">
+                <input class="form-control" asp-for="UserName" placeholder="Kullanıcı Adı">
+                <input type="password" class="form-control" asp-for="Password" placeholder="Parola">
+                <div class="checkbox-container">
+                    <input type="checkbox" asp-for="KeepMe">
+                    <label asp-for="KeepMe">Beni Hatırla</label>
+                </div>
+                <input type="submit" class="btn-primary" value="Oturum Aç">
+            </form>
+            <div class="text-small">
+                <p>Hesabınız yok mu? <a asp-action="Register">Yeni Kayıt</a></p>
+            </div>
+        </div>
+    </div>
+    <div class="right-container"></div>
+
+    <!-- Scripts -->
+    <script src="~/sbadmin/vendor/jquery/jquery.min.js"></script>
+    <script src="~/sbadmin/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/sbadmin/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="~/sbadmin/js/sb-admin-2.min.js"></script>
+    @await Component.InvokeAsync("Notyf")
+</body>
+
+</html>
