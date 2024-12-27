@@ -11,5 +11,8 @@ namespace Internet_1.Repositories
         }
 
         public DbSet<FileManagerViewModel> FileManagerViewModel { get; set; }
+
+        public DbSet<Note> Notes { get; set; }
     }
+
 }

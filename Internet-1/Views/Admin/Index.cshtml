@@ -1,6 +1,126 @@
-﻿@{
+﻿﻿@{
     Layout = "_LayoutAdmin";
 }
+
 <h1 class="h3 mb-4 text-gray-800">Admin Sayfası</h1>
-<h2>Yeni Üye Ekle</h2>
-   
+
+<div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            <a asp-controller="Category" asp-action="Index">Dosyalar</a>
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="catCount">@ViewBag.FileCount</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-list fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            <a asp-controller="User" asp-action="Index">Üyeler</a>
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800" id="UsercatCount">@ViewBag.usersayiCount</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-list fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div id="fileResult"></div> <!-- Dosya işlemleri için -->
+        <div id="UserResult"></div> <!-- Dosya işlemleri için -->
+        
+</div>
+
+@section Scripts {
+    <script>
+        // HUB Bağlantı
+        var connectionHub = new signalR.HubConnectionBuilder()
+            .withUrl("/general-hub", signalR.HttpTransportType.WebSockets)
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        // Category HUB
+        connectionHub.on("onCategoryAdd", (d) => {
+            $("#catCount").html(d);
+            $("#fileResult")
+                .show()
+                .removeClass()
+                .addClass("alert alert-info")
+                .html("Dosya Eklendi")
+                .fadeOut(5000);
+
+        });
+        connectionHub.on("onCategoryUpdate", (d) => {
+            $("#catCount").html(d);
+            $("#fileResult")
+                .show()
+                .removeClass()
+                .addClass("alert alert-info")
+                .html("Dosya İndirildi")
+                .fadeOut(5000);
+        });
+        connectionHub.on("onCategoryDelete", (d) => {
+            $("#catCount").html(d);
+            $("#fileResult")
+                .show()
+                .removeClass()
+                .addClass("alert alert-info")
+                .html("Dosya Silindi")
+                .fadeOut(5000);
+        });
+         
+            connectionHub.on("UserUpdate", (d) => {
+                        $("#UsercatCount").html(d);
+                    $("#UserResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-info")
+                            .html("Dosya İndirildi")
+                            .fadeOut(5000);
+                    });
+                    connectionHub.on("UserDelete", (d) => {
+                        $("#UsercatCount").html(d);
+                        $("#UserResult")
+                            .show()
+                            .removeClass()
+                            .addClass("alert alert-info")
+                            .html("Dosya Silindi")
+                            .fadeOut(5000);
+                    });
+
+
+        // start connection
+        function fullfilled() {
+            console.log("Bağlantı Başarılı");
+        }
+        function rejected() {
+            console.log("Bağlantı Hatalı");
+
+        }
+        connectionHub.start().then(fullfilled, rejected);
+
+    </script>
+
+
+}

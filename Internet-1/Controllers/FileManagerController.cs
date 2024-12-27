@@ -4,16 +4,20 @@ using System.Net;
 using Internet_1.Models;
 using Internet_1.Repositories;
 using Internet_1.ViewModels;
+using Internet_1.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 public class FileManagerController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly string rootPath = @"C:\Your\Root\Directory";
+    private readonly IHubContext<GeneralHub> _generalHub;
 
     // Yapıcı metod: ApplicationDbContext enjekte ediliyor
-    public FileManagerController(ApplicationDbContext context)
+    public FileManagerController(ApplicationDbContext context, IHubContext<GeneralHub> generalHub)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _generalHub = generalHub;
     }
 
     // Index metodu: Dosya veya klasörleri listelemek için kullanılır
@@ -92,12 +96,19 @@ public class FileManagerController : Controller
             _context.FileManagerViewModel.Add(fileManagerViewModel);
             await _context.SaveChangesAsync();
 
+           
+
             TempData["UploadMessage"] = "File uploaded successfully.";
         }
         catch (Exception ex)
         {
             TempData["UploadMessage"] = $"Error occurred: {ex.Message}";
         }
+
+        int catCount = _context.FileManagerViewModel.Count();
+        await _generalHub.Clients.All.SendAsync("onCategoryAdd", catCount);
+
+        
 
         return RedirectToAction("Index", new { folderPath });
     }
@@ -147,6 +158,8 @@ public class FileManagerController : Controller
                 _context.FileManagerViewModel.Remove(fileManagerViewModels);
                 await _context.SaveChangesAsync();
             }
+            int catCount = _context.FileManagerViewModel.Count();
+            await _generalHub.Clients.All.SendAsync("onCategoryDelete", catCount);
 
             return RedirectToAction("Index", new { folderPath = Path.GetDirectoryName(decodedPath) });
         }
@@ -168,6 +181,9 @@ public class FileManagerController : Controller
         var decodedFilePath = WebUtility.UrlDecode(filePath);
         var fullPath = Path.Combine(rootPath, decodedFilePath.TrimStart(Path.DirectorySeparatorChar));
 
+        int catCount = _context.FileManagerViewModel.Count();
+        await _generalHub.Clients.All.SendAsync("onCategoryUpdate", catCount);
+
         if (!fullPath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase))
         {
             return Forbid("Access to the specified file is not allowed.");
@@ -176,6 +192,7 @@ public class FileManagerController : Controller
         if (!System.IO.File.Exists(fullPath))
         {
             return NotFound($"The specified file does not exist: {fullPath}");
+
         }
 
         try
@@ -183,7 +200,10 @@ public class FileManagerController : Controller
             var fileBytes = await System.IO.File.ReadAllBytesAsync(fullPath);
             var fileName = Path.GetFileName(fullPath);
             return File(fileBytes, "application/octet-stream", fileName);
+
         }
+
+
         catch (Exception ex)
         {
             return BadRequest($"An error occurred while processing the file: {ex.Message}");

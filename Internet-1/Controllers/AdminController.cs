@@ -1,7 +1,10 @@
 ﻿using Internet_1.Models;
+using Internet_1.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Internet_1.Controllers
@@ -9,22 +12,32 @@ namespace Internet_1.Controllers
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
-
+        private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<AppRole> _roleManager;
 
-        public AdminController(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
+        // Tek bir constructor ile tüm bağımlılıkları tanımlıyoruz
+        public AdminController(
+            ApplicationDbContext context,
+            UserManager<AppUser> userManager,
+            RoleManager<AppRole> roleManager)
         {
+            _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
         }
 
+        public IActionResult Index()
+        {
+            // Dosya sayısını al ve ViewBag ile sayfaya gönder
+            var fileCount = _context.FileManagerViewModel.Count();
+            ViewBag.FileCount = fileCount;
+
+            return View();
+        }
+
         [HttpGet]
-        [AllowAnonymous] // Bu kısmı sadece test için ekliyoruz. Sonrasında kaldırabilirsin.
+        [AllowAnonymous] // Test amaçlı anonim erişime izin veriyoruz
         public async Task<IActionResult> CreateAdmin()
         {
             // Admin rolü var mı kontrol et, yoksa oluştur
@@ -66,9 +79,6 @@ namespace Internet_1.Controllers
             }
 
             return Content("Admin kullanıcı zaten mevcut.");
-
-
         }
     }
 }
-

@@ -11,12 +11,15 @@ using System.Diagnostics;
 using System.Security.Claims;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Identity;
+using Internet_1.Hubs;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Internet_1.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<HomeController> _logge;
         private readonly ProductRepository context;
 
         private readonly IMapper _mapper;
@@ -26,11 +29,16 @@ namespace Internet_1.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<AppRole> _roleManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IHubContext<GeneralHub> _generalHub;
+        private readonly ILogger<HomeController> _logger;
 
         public object JsonRequestBehavior { get; private set; }
+       
 
-        public HomeController(ILogger<HomeController> logger, ProductRepository productRepository, IMapper mapper, IConfiguration config, INotyfService notyf, IFileProvider fileProvider, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager)
+        public HomeController(ILogger<HomeController> logger, ProductRepository productRepository, IMapper mapper, IConfiguration config, INotyfService notyf, IFileProvider fileProvider, UserManager<AppUser> userManager, RoleManager<AppRole> roleManager, SignInManager<AppUser> signInManager, IHubContext<GeneralHub> generalHub)
         {
+            
+            _generalHub = generalHub;
             _logger = logger;
             context = productRepository;
             _mapper = mapper;
@@ -75,7 +83,7 @@ namespace Internet_1.Controllers
             {
 
                 await _userManager.AddClaimAsync(user, new Claim("PhotoUrl", user.PhotoUrl));
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "FileManager");
             }
             if (signInResult.IsLockedOut)
             {
@@ -114,8 +122,11 @@ namespace Internet_1.Controllers
                 var role = new AppRole { Name = "Uye" };
                 await _roleManager.CreateAsync(role);
             }
-
             await _userManager.AddToRoleAsync(user, "Uye");
+
+            int userCount = _userManager.Users.Count();
+            await _generalHub.Clients.All.SendAsync("UserAdd", userCount);
+
 
             _notyf.Success("Üye Kaydı Yapılmıştır. Oturum Açınız");
             return RedirectToAction("Login");
